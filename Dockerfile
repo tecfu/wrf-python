@@ -37,9 +37,12 @@ RUN mkdir -p /wrf/libs/openmpi/BUILD_DIR
 RUN source /opt/rh/devtoolset-8/enable \
  && cd /wrf/libs/openmpi/BUILD_DIR \
  && curl -L -O https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.0.tar.gz \
+ && echo "Downloaded openmpi" \
  && tar -xf openmpi-4.0.0.tar.gz \
  && cd openmpi-4.0.0 \
+ && echo "Configuring openmpi" \
  && ./configure --prefix=/usr/local &> /wrf/libs/build_log_openmpi_config \
+ && echo "Make install openmpi" \
  && make all install &> /wrf/libs/build_log_openmpi_make \
  && cd / \
  && rm -rf /wrf/libs/openmpi/BUILD_DIR
@@ -51,6 +54,7 @@ RUN source /opt/rh/devtoolset-8/enable \
  && git clone https://bitbucket.hdfgroup.org/scm/hdffv/hdf5.git \
  && cd hdf5 \
  && git checkout hdf5-1_10_4 \
+ && echo "configuring hdf5" \
  && ./configure --enable-fortran --enable-cxx --prefix=/usr/local/ &> /wrf/libs/build_log_hdf5_config \
  && make install &> /wrf/libs/build_log_hdf5_make \
  && rm -rf /wrf/libs/hdf5/BUILD_DIR
@@ -75,6 +79,7 @@ RUN source /opt/rh/devtoolset-8/enable \
  && cd netcdf-fortran-4.4.5/ \
  && export LD_LIBRARY_PATH=${NETCDF}/lib:${LD_LIBRARY_PATH} \
  && CPPFLAGS=-I${NETCDF}/include LDFLAGS=-L${NETCDF}/lib ./configure --prefix=${NETCDF} &> /wrf/libs/build_log_ncf_config \
+ && echo "make install netcdf" \
  && make install &> /wrf/libs/build_log_ncf_make
 
 RUN mkdir -p /var/run/sshd \
@@ -129,14 +134,14 @@ RUN if [ "$argname" = "regtest" ]  ; then curl -SL http://www2.mmm.ucar.edu/wrf/
 # Download wps source
 RUN if [ "$argname" = "tutorial" ] ; then git clone https://github.com/wrf-model/WPS.git WPS ; fi
 
-RUN echo _HERE1_
+RUN echo "cloning wrf"
 RUN git clone https://github.com/davegill/WRF.git davegill/WRF \
   && cd davegill/WRF \
   && git fetch origin +refs/pull/4/merge: \
   && git checkout -qf FETCH_HEAD \
   && cd .. \
   && mv WRF /wrf/WRF
-RUN echo _HERE2_
+RUN echo "wrf cloned"
 
 ENV JASPERINC /usr/include/jasper
 ENV JASPERLIB /usr/lib64
